@@ -131,8 +131,8 @@ void PrintVector(double *vData, uint16_t bufferSize, uint8_t scaleType){
         abscissa = ((i * 1.0 * samplingFrequency) / samples);
   break;
     }
-    Serial.print(i);
-    Serial.print(" ");
+    //Serial.print(i);
+    //Serial.print(" ");
     Serial.print(abscissa, 6);
     if(scaleType==SCL_FREQUENCY)
     Serial.print("Hz");
@@ -145,7 +145,8 @@ void PrintVector(double *vData, uint16_t bufferSize, uint8_t scaleType){
 /////////////////////////////////////////////////////////////////Stworzenie Wyresu na LCD/////////////////////////////////////////////////////////////////////////
 
 void graf(double *vData, uint16_t bufferSize, uint8_t scaleType){
-  double skala[20]={32,16,8,8,4,4,4,4,4,8,8,8,16,16,16,16,16,16,16,32};
+   //double skala[20]={32,16,8,8,4,4,4,4,4,8,8,8,16,16,16,16,16,16,16,32}; //DOmyśna dla duzej FSP
+  double skala[20]={1,2,2,2,2,2,2,4,4,4,4,4,4,4,4,8,16,32,54,100}; // Wedlgu oktaw
   double amp = 0;
   double probka = 0;
   uint8_t wysokosc = 4;
@@ -167,9 +168,9 @@ void graf(double *vData, uint16_t bufferSize, uint8_t scaleType){
     break;
     }
     if(probka < skala[kolumna]){
-      Serial.print("nr probki ");
-      Serial.print(probka+1);
-      Serial.println("  ");
+      //Serial.print("nr probki ");
+      //Serial.print(probka+1);
+      //Serial.println("  ");
      // Serial.print(abscissa);
      // Serial.print("Hz ");
      // Serial.print(vData[i]);
@@ -179,20 +180,20 @@ void graf(double *vData, uint16_t bufferSize, uint8_t scaleType){
      // Serial.println(amp);
       
     }else{
-      Serial.print("  amp/skala ");
+      //Serial.print("  amp/skala ");
       amp = amp/skala[kolumna];
-      Serial.println(amp);
+      //Serial.println(amp);
       uint8_t zmp =  map(amp, 0, 20000, 0, 31);
-      Serial.print(" ZMP ");
-      Serial.println(zmp);
+      //Serial.print(" ZMP ");
+      //Serial.println(zmp);
       lcd.draw_vertical_graph(wiersz, kolumna, wysokosc, zmp);
       probka = 0;
       kolumna++;
       amp = 0;
-      Serial.print("wykonane ");
-      Serial.println(kolumna);
-      Serial.println("");
-      Serial.println("");
+      //Serial.print("wykonane ");
+      //Serial.println(kolumna);
+      //Serial.println("");
+      //Serial.println("");
     }
   }  
 }
@@ -263,17 +264,17 @@ void loop(){
 /////////////////////////////////////////////////////////////////////Transformata Fouriera////////////////////////////////////////////////////////////////////////
 
   FFT.DCRemoval(vReal, samples); 
-  FFT.Windowing(vReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+  FFT.Windowing(vReal, samples, FFT_WIN_TYP_HANN, FFT_FORWARD);
   FFT.Compute(vReal, vImag, samples, FFT_FORWARD);
   FFT.ComplexToMagnitude(vReal, vImag, samples);
 
 //////////////////////////////////////////////////////////////////////Obróbka Danych//////////////////////////////////////////////////////////////////////////////
   
-  //PrintVector(vReal, (samples >> 1), SCL_FREQUENCY);
+  PrintVector(vReal, (samples >> 1), SCL_FREQUENCY);
   //double x = FFT.MajorPeak(vReal, samples, samplingFrequency); /Znalezienie najwyższej częstotliwości przy wykorzystaniu bilioteki ArduinoFFT
   find4(vReal, (samples >> 1), SCL_FREQUENCY);
   resultNumber = 0;
-  //graf(vReal, (samples >> 1), SCL_FREQUENCY);
+  
   
 //////////////////////////////////////////////////////////////////////Guzik///////////////////////////////////////////////////////////////////////////////////////
   
