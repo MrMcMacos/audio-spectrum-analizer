@@ -4,7 +4,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
-#define SCL_INDEX 0x00                      //
+#define SCL_INDEX 0x00                      // Serial Clock
 #define SCL_TIME 0x01                       //
 #define SCL_FREQUENCY 0x02                  //
 #define SCL_PLOT 0x03                       //
@@ -15,7 +15,7 @@
  
 const byte adcPin = 0;                      // A0
 const uint16_t samples = 512;               // This value MUST ALWAYS be a power of 2
-const double samplingFrequency = 2000;     // Will affect timer max value in timer_setup() SYSCLOCK/8/samplingFrequency should be a integer
+const double samplingFrequency = 35000;     // Will affect timer max value in timer_setup() SYSCLOCK/8/samplingFrequency should be a integer
 const int buttonPin = 48;                   // the number of the pushbutton pin
 const int ledPin = 13;                      // the number of the LED pin
 
@@ -47,13 +47,13 @@ EMPTY_INTERRUPT (TIMER1_COMPB_vect);
 
 ////////////////////////////////////////////////////////////SETUP TIMERA//////////////////////////////////////////////////////////////////////////////////////////
 
-void timer_setup(){                                 // reset Timer 1
-  TCCR1A = 0;
-  TCCR1B = 0;
-  TCNT1 = 0;
+void timer_setup(){                                 // reset Timera 1
+  TCCR1A = 0;                                       // Timer/Counter 1 Control Register A 
+  TCCR1B = 0;                                       // Timer/Counter 1 Control Register B
+  TCNT1 = 0;                                        // Timer Current Count
   TCCR1B = bit (CS11) | bit (WGM12);                // CTC, prescaler of 8
-  TIMSK1 = bit (OCIE1B);
-  OCR1A = ((16000000 / 8) / samplingFrequency) -1;  // sampling frequency = 16/8/250 MHz =  8  KHz 
+  TIMSK1 = bit (OCIE1B);                            // Timer/Counter 1's interrupt mask register(Output CompareB Match Interrupt Enable)
+  OCR1A = ((16000000 / 8) / samplingFrequency) -1;  // Częstotliwość próbkowania = 16/8/250 MHz =  8  KHz 
 }
 
 ////////////////////////////////////////////////////////////SETUP ADC/////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ void timer_setup(){                                 // reset Timer 1
 void adc_setup() {
   ADCSRA =  bit (ADEN) | bit (ADIE) | bit (ADIF);   // włączenie ADC, przerwanie po zakońćzeniu
   ADCSRA |= bit (ADPS2);                            // Prescaler = 16
-  ADMUX = bit (REFS0) | (adcPin & 7);               //
+  ADMUX = bit (REFS0) | (adcPin & 7);               // Wybranie napięcia referencyjnego dla ADC
   ADCSRB = bit (ADTS0) | bit (ADTS2);               // Timer/Counter1 Compare Match B trigger source
   ADCSRA |= bit (ADATE);                            // włączanie automatycznego wyzwalania
 }
@@ -159,25 +159,25 @@ void graf(double *vData, uint16_t bufferSize, uint8_t scaleType){
     switch (scaleType){
       case SCL_INDEX:
         abscissa = (i * 1.0);
-    break;
+        break;
       case SCL_TIME:
         abscissa = ((i * 1.0) / samplingFrequency);
-    break;
+        break;
       case SCL_FREQUENCY:
         abscissa = ((i * 1.0 * samplingFrequency) / samples);
-    break;
+        break;
     }
     if(probka < skala[kolumna]){
       //Serial.print("nr probki ");
       //Serial.print(probka+1);
       //Serial.println("  ");
-     // Serial.print(abscissa);
-     // Serial.print("Hz ");
-     // Serial.print(vData[i]);
-     // Serial.print(" amp  ");
+      //Serial.print(abscissa);
+      //Serial.print("Hz ");
+      //Serial.print(vData[i]);
+      //Serial.print(" amp  ");
       amp = amp + vData[i];
       probka++;
-     // Serial.println(amp);
+      //Serial.println(amp);
       
     }else{
       //Serial.print("  amp/skala ");
@@ -278,12 +278,12 @@ void loop(){
   
 //////////////////////////////////////////////////////////////////////Guzik///////////////////////////////////////////////////////////////////////////////////////
   
-  if (digitalRead(buttonPin)==HIGH){  // jeśli guzik jest naciśnięty
-    if (ledflag==0){                 // a flaga jest == 0
-      ledflag=1;                      // zmien ją na 1
-      digitalWrite(ledPin,HIGH);      // i włącz LEDe
-    }                               // 
-    else if(ledflag==1){                            // jeśli nie 
+  if (digitalRead(buttonPin)==HIGH){  //jeśli guzik jest naciśnięty
+    if (ledflag==0){                  //a flaga jest == 0
+      ledflag=1;                      //zmien ją na 1
+      digitalWrite(ledPin,HIGH);      //i włącz LEDe
+    }                                 // 
+    else if(ledflag==1){              // jeśli nie 
       ledflag=2;                      // zmień na flage na 0
       digitalWrite(ledPin,LOW);       // i wyłącz LEDe
     }
@@ -347,7 +347,7 @@ void loop(){
 /////////////////////////////////////////////////////////////////Funkcje Końcowe//////////////////////////////////////////////////////////////////////////////////
 
   memclear();
-  delay(100);                      
+  //delay(100);                      
   zeroI();
   adc_setup();
 }
